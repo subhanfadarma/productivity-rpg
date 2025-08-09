@@ -2,7 +2,7 @@
   "name": "Productivity RPG",
   "short_name": "Prod RPG",
   "description": "A productivity tracker game based on your tasks.",
-  "start_url": "/RPG Quest.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0b0f17",
   "theme_color": "#1fb6ff",
@@ -18,4 +18,5 @@
       "type": "image/png"
     }
   ]
+
 }
