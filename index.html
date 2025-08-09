@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="manifest" href="manifest.json">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Productivity RPG — Dark (v2)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Rubik:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="manifest" href="manifest.json">
 <style>
   :root{
     --bg:#0b0f17;
@@ -402,7 +402,7 @@
             {id:'skin-neon', name:'Neon Accent', price:30, desc:'Ubah aksen HUD', owned:false, equipped:false, effect:{accent1:'#00aaff', accent2:'#22dd99'}},
             {id:'badge-gold', name:'Badge Gold', price:20, desc:'Badge kosmetik (profil)', owned:false, equipped:false},
             {id:'xp-booster', name:'XP Booster (1 day)', price:25, desc:'Boost XP x1.5 untuk hari berikutnya', owned:0, consumable:true}
-          ], boosterActiveUntil:null };
+          ], boosterActiveUntil:null }
         }
       }catch(e){
         console.error('storage parse', e);
@@ -614,10 +614,25 @@
   modalBackdrop.addEventListener('click', (e)=> { if(e.target === modalBackdrop) closeModal(); });
   modalSave.addEventListener('click', ()=>{
     const q = state.quests.find(x=>x.id===modalTargetId); if(!q) return;
+    
+    // Perbaikan: Logika cek deadline dan ganti tipe quest
+    let newType = modalType.value;
+    const deadline = modalDeadline.value;
+    if (newType === 'Daily' && deadline) {
+      const deadlineDate = new Date(deadline);
+      const today = new Date();
+      const diffTime = deadlineDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays > 7) {
+        newType = 'Weekly';
+        alert('Deadline lebih dari 7 hari, tipe quest diubah menjadi Weekly.');
+      }
+    }
+    
     q.desc = modalDesc.value.trim();
-    q.type = modalType.value;
+    q.type = newType;
     q.priority = modalPriority.value;
-    q.deadline = modalDeadline.value || null;
+    q.deadline = deadline || null;
     q.title = modalTitle.textContent || q.title;
     save(); renderQuests(); renderHUD(); pushLog(`Quest updated: ${q.title}`); closeModal();
   });
@@ -630,7 +645,22 @@
   addQuestBtn.addEventListener('click', ()=>{
     const title = qTitle.value.trim();
     if(!title) return alert('Isi judul quest');
-    const obj = { id: uid(), title, priority: qPriority.value, type: qType.value, deadline: qDeadline.value || null, desc:'', completed:false, completedAt:null, xpAwarded:0, coinsAwarded:0 };
+    
+    // Perbaikan: Logika cek deadline dan ganti tipe quest
+    let newType = qType.value;
+    const deadline = qDeadline.value;
+    if (newType === 'Daily' && deadline) {
+      const deadlineDate = new Date(deadline);
+      const today = new Date();
+      const diffTime = deadlineDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays > 7) {
+        newType = 'Weekly';
+        alert('Deadline lebih dari 7 hari, tipe quest diubah menjadi Weekly.');
+      }
+    }
+
+    const obj = { id: uid(), title, priority: qPriority.value, type: newType, deadline: deadline || null, desc:'', completed:false, completedAt:null, xpAwarded:0, coinsAwarded:0 };
     state.quests.unshift(obj);
     qTitle.value=''; qDeadline.value='';
     save(); renderQuests(); pushLog(`Quest ditambahkan: ${title}`);
@@ -817,6 +847,7 @@
   window.addEventListener('beforeunload', ()=> save());
 })();
 </script>
+
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
