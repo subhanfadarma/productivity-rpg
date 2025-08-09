@@ -12,7 +12,7 @@
     --bg:#0b0f17;
     --panel:#0f1720;
     --muted:#9aa6b2;
-    --text:#e6f2f6;
+    --text:#e6f2e6;
     --accent1:#1fb6ff;
     --accent2:#23d199;
     --gold:#ffd166;
@@ -61,35 +61,30 @@
   .btn{padding:8px 10px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#021;font-weight:800;cursor:pointer}
   .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent1)}
   .small{font-size:12px;padding:6px 8px}
-  
-  /* PERBAIKAN: Warna input dan select */
   .field{
     padding:10px;
     border-radius:10px;
     border:1px solid rgba(255,255,255,0.03);
-    background:var(--bg); /* Latar belakang gelap */
-    color:var(--text); /* Warna teks terang */
+    background:var(--bg);
+    color:var(--text);
   }
   .field option{
-    background:var(--bg); /* Latar belakang gelap untuk pilihan */
-    color:var(--text); /* Warna teks terang untuk pilihan */
+    background:var(--bg);
+    color:var(--text);
   }
   .field::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* Untuk warna icon tanggal */
+    filter: invert(1);
   }
-
   .row{display:flex;gap:8px}
   .row .field{flex:1}
   .quest-xp{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-weight:900;color:var(--text);opacity:0;pointer-events:none}
   .xp-gain{color:var(--accent2);animation:xp-pop .9s forwards}
   .xp-loss{color:var(--danger);animation:xp-pop .9s forwards}
   @keyframes xp-pop{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-20px) scale(.95);opacity:0}}
-  
-  /* PERBAIKAN: Latar belakang modal tidak lagi transparan */
   .modal-backdrop{
     position:fixed;
     inset:0;
-    background:rgba(2,8,12,0.8); /* Warna latar belakang pop-up lebih solid */
+    background:rgba(2,8,12,0.8);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -100,7 +95,7 @@
   .modal-backdrop.show{opacity:1;pointer-events:auto}
   .modal{
     width:min(760px,94%);
-    background:var(--panel); /* Warna latar belakang modal solid */
+    background:var(--panel);
     border-radius:14px;
     padding:18px;
     border:1px solid rgba(255,255,255,0.03);
@@ -614,21 +609,17 @@
   modalBackdrop.addEventListener('click', (e)=> { if(e.target === modalBackdrop) closeModal(); });
   modalSave.addEventListener('click', ()=>{
     const q = state.quests.find(x=>x.id===modalTargetId); if(!q) return;
-    
-    // Perbaikan: Logika cek deadline dan ganti tipe quest
+
+    // -- PERBAIKAN LOGIKA TERBARU DI SINI --
     let newType = modalType.value;
     const deadline = modalDeadline.value;
-    if (newType === 'Daily' && deadline) {
-      const deadlineDate = new Date(deadline);
-      const today = new Date();
-      const diffTime = deadlineDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays > 7) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (newType === 'Daily' && deadline && deadline !== today) {
         newType = 'Weekly';
-        alert('Deadline lebih dari 7 hari, tipe quest diubah menjadi Weekly.');
-      }
+        alert('Deadline di masa depan, tipe quest diubah menjadi Weekly.');
     }
-    
+    // -- AKHIR PERBAIKAN --
+
     q.desc = modalDesc.value.trim();
     q.type = newType;
     q.priority = modalPriority.value;
@@ -645,20 +636,16 @@
   addQuestBtn.addEventListener('click', ()=>{
     const title = qTitle.value.trim();
     if(!title) return alert('Isi judul quest');
-    
-    // Perbaikan: Logika cek deadline dan ganti tipe quest
+
+    // -- PERBAIKAN LOGIKA TERBARU DI SINI --
     let newType = qType.value;
     const deadline = qDeadline.value;
-    if (newType === 'Daily' && deadline) {
-      const deadlineDate = new Date(deadline);
-      const today = new Date();
-      const diffTime = deadlineDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays > 7) {
-        newType = 'Weekly';
-        alert('Deadline lebih dari 7 hari, tipe quest diubah menjadi Weekly.');
-      }
+    const today = new Date().toISOString().slice(0, 10);
+    if (newType === 'Daily' && deadline && deadline !== today) {
+      newType = 'Weekly';
+      alert('Deadline di masa depan, tipe quest diubah menjadi Weekly.');
     }
+    // -- AKHIR PERBAIKAN --
 
     const obj = { id: uid(), title, priority: qPriority.value, type: newType, deadline: deadline || null, desc:'', completed:false, completedAt:null, xpAwarded:0, coinsAwarded:0 };
     state.quests.unshift(obj);
